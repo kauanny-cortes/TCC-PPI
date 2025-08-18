@@ -5,18 +5,47 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = $_POST['email'];
     $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT);
 
+    //$verificacao = "SELECT email, COUNT(*) AS total FROM usuarios HAVING total > 1";
+    $consulta = "SELECT  * FROM usuarios WHERE email = '$email'";
+    echo $consulta;
+    $stmt = $conn->prepare($consulta);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        echo "<script>alert('❌ Erro: Email já cadastrado!');</script>";
+    }
+    else{
+        $sql = "INSERT INTO usuarios (email, senha) VALUES (?, ?)";
+        $stmt2 = $conn->prepare($sql);
+        $stmt2->bind_param("ss", $email, $senha);
+         if ($stmt2->execute()) {
+            header("Location: sucesso.php");
+            exit();
+         }
+         else{
+            echo "<script>alert('❌ Erro:Erro ao inserir usuário');</script>";
+         }
+    }
+
+    /*if($verificacao > 0){
+        echo "<script>alert('❌ Erro: Email já cadastrado!');</script>";
+    }else{
     $sql = "INSERT INTO usuarios (email, senha) VALUES (?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ss", $email, $senha);
-
-    if ($stmt->execute()) {
-        header("Location: sucesso.php");
-exit();
-
-    } else {
-        echo "<script>alert('❌ Erro: Email já cadastrado!');</script>";
-    }
+    $stmt->execute();
+    */
 }
+
+    //if ($stmt->execute()) {
+    //    header("Location: sucesso.php");
+    //exit();
+
+    //} else {
+    //    echo "<script>alert('❌ Erro: Email já cadastrado!');</script>";
+    //}
+//}
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -58,4 +87,3 @@ exit();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
